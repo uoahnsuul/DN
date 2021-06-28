@@ -1,0 +1,72 @@
+# VTMBMS Block Statistics
+# Sequence size: [1920x 1080]
+# Block Statistic Type: PredMode; int8; [0, 4]
+# Block Statistic Type: Depth; int8; [0, 7]
+# Block Statistic Type: QT_Depth; int8; [0, 7]
+# Block Statistic Type: BT_Depth; int8; [0, 7]
+# Block Statistic Type: MT_Depth; int8; [0, 7]
+# Block Statistic Type: ChromaQPAdj; int8; [-10, 10]
+# Block Statistic Type: QP; int8; [0, 51]
+# Block Statistic Type: SplitSeries; uint64; [0, 18446744073709551615]
+# Block Statistic Type: MTS_Y; int8; 
+# Block Statistic Type: MTS_Cb; int8; 
+# Block Statistic Type: MTS_Cr; int8; 
+# Block Statistic Type: BDPCM; int8; 
+# Block Statistic Type: BDPCMChroma; int8; 
+# Block Statistic Type: TileIdx; int8; 
+# Block Statistic Type: IndependentSliceIdx; int8; 
+# Block Statistic Type: LFNSTIdx; int8; [0, 3]
+# Block Statistic Type: JointCbCr; int8; 
+# Block Statistic Type: CompAlphaCb; int8; 
+# Block Statistic Type: CompAlphaCr; int8; 
+# Block Statistic Type: RDPCM_Y; int8; [0, 3]
+# Block Statistic Type: RDPCM_Cb; int8; [0, 3]
+# Block Statistic Type: RDPCM_Cr; int8; [0, 3]
+# Block Statistic Type: Luma_IntraMode; int8; [0, 70]
+# Block Statistic Type: Chroma_IntraMode; int8; [0, 70]
+# Block Statistic Type: MultiRefIdx; int8; [0, 1]
+# Block Statistic Type: MIPFlag; int8; 
+# Block Statistic Type: ISPMode; int8; [0, 3]
+# Block Statistic Type: SkipFlag; int8; 
+# Block Statistic Type: RootCbf; int8; 
+# Block Statistic Type: SbtIdx; int8; [0, 5]
+# Block Statistic Type: SbtPos; int8; [0, 2]
+# Block Statistic Type: Cbf_Y; int8; 
+# Block Statistic Type: Cbf_Cb; int8; 
+# Block Statistic Type: Cbf_Cr; int8; 
+# Block Statistic Type: IMVMode; int8; [0, 2]
+# Block Statistic Type: InterDir; int8; [1, 3]
+# Block Statistic Type: MergeFlag; int8; 
+# Block Statistic Type: RegularMergeFlag; int8; 
+# Block Statistic Type: MergeIdx; int8; [0, 7]
+# Block Statistic Type: MergeType; int8; [0, 2]
+# Block Statistic Type: MVPIdxL0; int8; [0, 1]
+# Block Statistic Type: MVPIdxL1; int8; [0, 1]
+# Block Statistic Type: MVL0; Vector; Scale: 4
+# Block Statistic Type: MVL1; Vector; Scale: 4
+# Block Statistic Type: MVDL0; Vector; Scale: 4
+# Block Statistic Type: MVDL1; Vector; Scale: 4
+# Block Statistic Type: MotionBufL0; Vector; Scale: 16
+# Block Statistic Type: MotionBufL1; Vector; Scale: 16
+# Block Statistic Type: RefIdxL0; int8; [0, 4]
+# Block Statistic Type: RefIdxL1; int8; [0, 4]
+# Block Statistic Type: AffineFlag; int8; 
+# Block Statistic Type: AffineMVL0; AffineTFVectors; Scale: 4
+# Block Statistic Type: AffineMVL1; AffineTFVectors; Scale: 4
+# Block Statistic Type: AffineType; int8; 
+# Block Statistic Type: MMVDSkipFlag; int8; 
+# Block Statistic Type: MMVDMergeFlag; int8; 
+# Block Statistic Type: MMVDMergeIdx; int8; [0, 1]
+# Block Statistic Type: CiipFlag; int8; 
+# Block Statistic Type: SMVDFlag; int8; 
+# Block Statistic Type: GeoPartitioning; Line; 
+# Block Statistic Type: GeoMVL0; VectorPolygon; Scale: 4
+# Block Statistic Type: GeoMVL1; VectorPolygon; Scale: 4
+# Block Statistic Type: BCWIndex; int8; [0, 4]
+# Block Statistic Type: Depth_Chroma; int8; [0, 10]
+# Block Statistic Type: QT_Depth_Chroma; int8; [0, 10]
+# Block Statistic Type: BT_Depth_Chroma; int8; [0, 10]
+# Block Statistic Type: MT_Depth_Chroma; int8; [0, 10]
+# Block Statistic Type: ChromaQPAdj_Chroma; int8; [-10, 10]
+# Block Statistic Type: QP_Chroma; int8; [0, 51]
+# Block Statistic Type: SplitSeries_Chroma; uint64; [0, 18446744073709551615]
