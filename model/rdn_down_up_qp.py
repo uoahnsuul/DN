@@ -59,7 +59,7 @@ class RDN(nn.Module):
         }[args.RDNconfig]
 
         # Shallow feature extraction net
-        self.SFENet1_input4 = nn.Conv2d(4, G0//2, kSize, padding=(kSize - 1) // 2, stride=1)
+        self.SFENet1_input5 = nn.Conv2d(5, G0//2, kSize, padding=(kSize - 1) // 2, stride=1)
         self.SFENet2 = nn.Conv2d(G0//2, G0, kSize, padding=(kSize - 1) // 2, stride=2)
 
         # Redidual dense blocks and dense feature fusion
@@ -99,7 +99,7 @@ class RDN(nn.Module):
             raise ValueError("scale must be 2 or 3 or 4.")
 
     def forward(self, x):
-        _x = self.SFENet1_input4(x)
+        _x = self.SFENet1_input5(x)
         _x = self.SFENet2(_x)
 
         RDBs_out = []
@@ -118,4 +118,4 @@ if __name__ == '__main__':
     from option import args
 
     model = RDN(args)
-    summary(model, (4, 64, 64))
+    summary(model, (5, 96, 96), device='cpu')
