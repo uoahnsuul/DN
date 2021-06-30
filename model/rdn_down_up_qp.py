@@ -83,9 +83,9 @@ class RDN(nn.Module):
         # Up-sampling net
         elif r == 2 or r == 3:
             self.UPNet = nn.Sequential(*[
-                nn.Conv2d(G0, G * r * r, kSize, padding=(kSize - 1) // 2, stride=1),
+                nn.Conv2d(G0//2, G * r * r, kSize, padding=(kSize - 1) // 2, stride=1),
                 nn.PixelShuffle(r),
-                nn.Conv2d(G, 3, kSize, padding=(kSize - 1) // 2, stride=1)
+                nn.Conv2d(G, 1, kSize, padding=(kSize - 1) // 2, stride=1)
             ])
         elif r == 4:
             self.UPNet = nn.Sequential(*[
@@ -98,7 +98,14 @@ class RDN(nn.Module):
         else:
             raise ValueError("scale must be 2 or 3 or 4.")
 
+        self.chroma = nn.Conv2d(64, 2, kSize, padding=(kSize - 1) // 2)
+        self.down = nn.Conv2d(5, 5, kSize, padding=(kSize - 1) // 2, stride=2)
+
     def forward(self, x):
+        Y = x[:, 0, :, :]
+        UV = x[:, 1:3, :, :]
+        QP = x[:, 3, :, :]
+        CU = x[:, 4, :, :]
         _x = self.SFENet1_input5(x)
         _x = self.SFENet2(_x)
 
@@ -110,7 +117,17 @@ class RDN(nn.Module):
         _x = self.GFF(torch.cat(RDBs_out, 1))
         # x += f__1
 
-        return self.UPNet(_x) + x[:,:3,...]
+        outY = _x[:,0:64,:,:]
+        outUV = _x[:,64:,:,:]
+
+        outY = self.UPNet(outY)[:,0,:,:] + x[:,0,...]
+        outUV = self.chroma(outUV)
+        chroma_org = self.down(x)[:,1:3,...]
+        outUV = outUV + chroma_org
+
+        #out = self.UPNet(_x) + x[:,:3,...]
+
+        return outY, outUV
 
 
 if __name__ == '__main__':

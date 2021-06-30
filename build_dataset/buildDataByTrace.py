@@ -571,7 +571,7 @@ if __name__ == '__main__':
     # os.chdir("../")
     print(os.getcwd())
     sp = SplitManager()
-    #sp.getDataset('Training')
+    sp.getDataset('Training')
     sp.getDataset('Validation')
     sp.getDataset('Test')
 
