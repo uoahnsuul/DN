@@ -635,8 +635,17 @@ if __name__=='__main__':
     parser.add_argument('-tc', type=int, default=None, help='total computer num')
     parser.add_argument('-id', type=int, default=None, help='Which computer is it')
     args = parser.parse_args()
-    if args.type and args.tc and args.id:
-        default_cfg = cfg(type=args.type.lower(), total_com=args.tc, num_com=args.id)
+    if args.type is not None or args.tc is not None or args.id is not None:
+        tmp_type = default_cfg.type
+        tmp_tc = default_cfg.total_com
+        tmp_id = default_cfg.num_com
+        if args.type is not None:
+            tmp_type = [t.lower() for t in args.type]
+        if args.tc is not None:
+            tmp_tc = args.tc
+        if args.id is not None:
+            tmp_id = args.id
+        default_cfg = cfg(type=tmp_type, total_com=tmp_tc, num_com=tmp_id)
     assert set(default_cfg.type) <= set(type_list)
     r = RunEncoder()
     r.RunEncoder()
