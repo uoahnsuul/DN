@@ -11,7 +11,7 @@ class BasicConv(nn.Module):
         super(BasicConv, self).__init__()
         self.out_channels = out_planes
         self.conv = nn.Conv2d(in_planes, out_planes, kernel_size=kernel_size, stride=stride, padding=padding, dilation=dilation, groups=groups, bias=bias)
-        self.bn = nn.BatchNorm2d(out_planes,eps=1e-5, momentum=0.01, affine=True) if bn else None
+        self.bn = nn.BatchNorm2d(out_planes, eps=1e-5, momentum=0.01, affine=True) if bn else None
         self.relu = nn.ReLU() if relu else None
 
     def forward(self, x):
@@ -136,9 +136,8 @@ class GRDB(nn.Module):
 
         G0 = growRate0
 
-        self.D = 16
-        C = 8
-        G = 64
+        # number of RDB blocks, conv layers, out channels
+        self.D, C, G = 16, 8, 64
 
         self.RDBs = nn.ModuleList()
         for i in range(self.D):
@@ -168,41 +167,44 @@ class GRDN(nn.Module):
         G0 = args.G0
         kSize = args.RDNkSize
 
-        self.D = 5
-        C = 8
-        G = 64
+        # number of RDB blocks, conv layers, out channels
+        self.D, C, G = 16, 8, 64
 
         self.SFENet1 = nn.Conv2d(3, G0, kSize, padding=(kSize-1)//2, stride=1)
 
+        #convDown
         self.SFENet2 = nn.Conv2d(G0, G0, kSize, padding=(kSize-1)//2, stride=2)
+
         self.GRDBs = nn.ModuleList()
         for i in range(self.D):
             self.GRDBs.append(
                 GRDB(growRate0=G0)
             )
 
+        #convUp
         if r==1:
             self.UPNet = nn.Sequential(*[
                 nn.ConvTranspose2d(G0, G0, kSize, padding=(kSize-1)//2, stride=2, output_padding=1)
             ])
 
-        # Up-sampling net
-        elif r == 2 or r == 3:
-            self.UPNet = nn.Sequential(*[
-                nn.Conv2d(G0, G * r * r, kSize, padding=(kSize-1)//2, stride=1),
-                nn.PixelShuffle(r),
-                nn.Conv2d(G, args.n_colors, kSize, padding=(kSize-1)//2, stride=1)
-            ])
-        elif r == 4:
-            self.UPNet = nn.Sequential(*[
-                nn.Conv2d(G0, G * 4, kSize, padding=(kSize-1)//2, stride=1),
-                nn.PixelShuffle(2),
-                nn.Conv2d(G, G * 4, kSize, padding=(kSize-1)//2, stride=1),
-                nn.PixelShuffle(2),
-                nn.Conv2d(G, args.n_colors, kSize, padding=(kSize-1)//2, stride=1)
-            ])
-        else:
-            raise ValueError("scale must be 2 or 3 or 4.")
+        # # DRN Up-sampling net
+        # elif r == 2 or r == 3:
+        #     self.UPNet = nn.Sequential(*[
+        #         nn.Conv2d(G0, G * r * r, kSize, padding=(kSize-1)//2, stride=1),
+        #         nn.PixelShuffle(r),
+        #         nn.Conv2d(G, args.n_colors, kSize, padding=(kSize-1)//2, stride=1)
+        #     ])
+        # elif r == 4:
+        #     self.UPNet = nn.Sequential(*[
+        #         nn.Conv2d(G0, G * 4, kSize, padding=(kSize-1)//2, stride=1),
+        #         nn.PixelShuffle(2),
+        #         nn.Conv2d(G, G * 4, kSize, padding=(kSize-1)//2, stride=1),
+        #         nn.PixelShuffle(2),
+        #         nn.Conv2d(G, args.n_colors, kSize, padding=(kSize-1)//2, stride=1)
+        #     ])
+        # else:
+        #     raise ValueError("scale must be 2 or 3 or 4.")
+
         self.cbam = CBAM(gate_channels=G0)
         self.final_conv = nn.Conv2d(G0, args.n_colors, kernel_size=3, padding=1)
 
@@ -215,9 +217,9 @@ class GRDN(nn.Module):
             y = self.GRDBs[i](y)
 
         y = self.UPNet(y)
-        out = self.cbam(y)
-        out = self.final_conv(out)
-        return out+x
+        y = self.cbam(y)
+        y = self.final_conv(y)
+        return y + x
 
 
 
