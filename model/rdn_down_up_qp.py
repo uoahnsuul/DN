@@ -1,7 +1,7 @@
 # Residual Dense Network for Image Super-Resolution
 # https://arxiv.org/abs/1802.08797
 
-from model import common
+#from model import common
 
 import torch
 import torch.nn as nn
@@ -102,10 +102,12 @@ class RDN(nn.Module):
         self.down = nn.Conv2d(5, 5, kSize, padding=(kSize - 1) // 2, stride=2)
 
     def forward(self, x):
-        Y = x[:, 0, :, :]
-        UV = x[:, 1:3, :, :]
-        QP = x[:, 3, :, :]
-        CU = x[:, 4, :, :]
+
+        # Y = x[:, 0, :, :]
+        # UV = x[:, 1:3, :, :]
+        # QP = x[:, 3, :, :]
+        # CU = x[:, 4, :, :]
+
         _x = self.SFENet1_input5(x)
         _x = self.SFENet2(_x)
 
@@ -117,17 +119,19 @@ class RDN(nn.Module):
         _x = self.GFF(torch.cat(RDBs_out, 1))
         # x += f__1
 
-        outY = _x[:,0:64,:,:]
-        outUV = _x[:,64:,:,:]
+        outY = _x[:, 0:64, :, :]
+        outUV = _x[:, 64:, :, :]
 
-        outY = self.UPNet(outY)[:,0,:,:] + x[:,0,...]
+        outY = self.UPNet(outY)[:, 0, :, :] + x[:, 0, ...]
         outUV = self.chroma(outUV)
-        chroma_org = self.down(x)[:,1:3,...]
+        chroma_org = self.down(x)[:, 1:3, ...]
         outUV = outUV + chroma_org
 
         #out = self.UPNet(_x) + x[:,:3,...]
 
-        return outY, outUV
+        out = [outY, outUV]
+
+        return out
 
 
 if __name__ == '__main__':
