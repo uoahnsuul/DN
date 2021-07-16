@@ -99,7 +99,11 @@ class tracing_data(srdata.SRData):
             f = self.image_dic[file]
         else:
             f = np.load(file, allow_pickle=True)
-        return np.stack((f['Y'], UpSamplingChroma(f['Cb']), UpSamplingChroma(f['Cr'])), axis=2)
+        # 4:4:4
+        # return np.stack((f['Y'], UpSamplingChroma(f['Cb']), UpSamplingChroma(f['Cr'])), axis=2)
+
+        # 4:2:0
+        return np.stack((f['Y'], f['Cb'], f['Cr']), axis=2)
 
     def read_npz_split_yuv(self, file):
         if self.args.image_pin_memory:
