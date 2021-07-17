@@ -170,10 +170,9 @@ class GRDN(nn.Module):
         # number of RDB blocks, conv layers, out channels
         self.D, C, G = 16, 8, 64
 
-        self.SFENet1 = nn.Conv2d(3, G0, kSize, padding=(kSize-1)//2, stride=1)
+        self.SFENet = nn.Conv2d(3, G0, kSize, padding=(kSize-1)//2, stride=1)
 
-        #convDown
-        self.SFENet2 = nn.Conv2d(G0, G0, kSize, padding=(kSize-1)//2, stride=2)
+        self.convDown = nn.Conv2d(G0, G0, kSize, padding=(kSize-1)//2, stride=2)
 
         self.GRDBs = nn.ModuleList()
         for i in range(self.D):
@@ -181,42 +180,20 @@ class GRDN(nn.Module):
                 GRDB(growRate0=G0)
             )
 
-        #convUp
-        if r==1:
-            self.UPNet = nn.Sequential(*[
+        self.convUp = nn.Sequential(*[
                 nn.ConvTranspose2d(G0, G0, kSize, padding=(kSize-1)//2, stride=2, output_padding=1)
             ])
-
-        # # DRN Up-sampling net
-        # elif r == 2 or r == 3:
-        #     self.UPNet = nn.Sequential(*[
-        #         nn.Conv2d(G0, G * r * r, kSize, padding=(kSize-1)//2, stride=1),
-        #         nn.PixelShuffle(r),
-        #         nn.Conv2d(G, args.n_colors, kSize, padding=(kSize-1)//2, stride=1)
-        #     ])
-        # elif r == 4:
-        #     self.UPNet = nn.Sequential(*[
-        #         nn.Conv2d(G0, G * 4, kSize, padding=(kSize-1)//2, stride=1),
-        #         nn.PixelShuffle(2),
-        #         nn.Conv2d(G, G * 4, kSize, padding=(kSize-1)//2, stride=1),
-        #         nn.PixelShuffle(2),
-        #         nn.Conv2d(G, args.n_colors, kSize, padding=(kSize-1)//2, stride=1)
-        #     ])
-        # else:
-        #     raise ValueError("scale must be 2 or 3 or 4.")
 
         self.cbam = CBAM(gate_channels=G0)
         self.final_conv = nn.Conv2d(G0, args.n_colors, kernel_size=3, padding=1)
 
-
-
     def forward(self, x):
-        y = self.SFENet1(x)
-        y = self.SFENet2(y)
+        y = self.SFENet(x)
+        y = self.convDown(y)
         for i in range(self.D):
             y = self.GRDBs[i](y)
 
-        y = self.UPNet(y)
+        y = self.convUp(y)
         y = self.cbam(y)
         y = self.final_conv(y)
         return y + x
