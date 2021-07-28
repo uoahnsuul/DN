@@ -14,6 +14,8 @@ import pickle
 import time
 
 
+
+
 class tracing_data(srdata.SRData):
     ppsfilename = 'PPSParam.npz'
     def __init__(self, args, name='DIV2K', train=True, benchmark=False):
@@ -100,10 +102,7 @@ class tracing_data(srdata.SRData):
         else:
             f = np.load(file, allow_pickle=True)
         # 4:4:4
-        # return np.stack((f['Y'], UpSamplingChroma(f['Cb']), UpSamplingChroma(f['Cr'])), axis=2)
-
-        # 4:2:0
-        return np.stack((f['Y'], f['Cb'], f['Cr']), axis=2)
+        return np.stack((f['Y'], UpSamplingChroma(f['Cb']), UpSamplingChroma(f['Cr'])), axis=2)
 
     def read_npz_split_yuv(self, file):
         if self.args.image_pin_memory:
@@ -112,6 +111,7 @@ class tracing_data(srdata.SRData):
             f = self.image_dic[file]
         else:
             f = np.load(file)
+        # 4:2:0
         return [f['Y'][:,:,None], np.stack((f['Cb'], f['Cr']), axis=2)]
 
     def _load_file(self, idx):
@@ -157,10 +157,11 @@ class tracing_data(srdata.SRData):
             return ret[0], ret[1], (iy, ip, ix, ip)
         if self.args.sc:
             tpy, tpx = hr[0].shape[:2]
+            imgy, imgx = hr[0].shape[:2]
         else:
             tpy, tpx = hr.shape[:2]
+            imgy, imgx = hr.shape[:2]
         ty, tx = 0, 0
-        imgy, imgx = hr.shape[:2]
         if self.train:
             hr, lr, (ty, tpy, tx, tpx) = _get_patch(
                 hr, lr, ih=tpy, iw=tpx,
@@ -273,6 +274,7 @@ class tracing_data(srdata.SRData):
         # return self.np2tensor(lr), self.np2tensor([hr])[0], filename
 
         depth = lr[0][:, :, 0]
+
         qp = self.getBlock2d(*pos, idx, BlockType.QP)
         partition = self.getBlock2dCu(*pos, depth, idx, BlockType.CU_Depth)
 
@@ -280,6 +282,7 @@ class tracing_data(srdata.SRData):
         partition = torch.unsqueeze(partition, 2)
         qp = torch.Tensor(qp)
         qp = torch.unsqueeze(qp, 2)
+
         re = torch.Tensor(lr[0])
         lr[0] = torch.cat([re, qp, partition], 2)
         lr[0] = lr[0].numpy()
