@@ -72,9 +72,9 @@ class Loss(nn.modules.loss._Loss):
         for i, l in enumerate(self.loss):
             if l['function'] is not None:
                 if type(sr) == list:
-                    lossLuma = l['function'](sr[0], hr[:,0,:,:])
-                    lossChroma = l['function'](sr[1], hr[:,1:,::2,::2])
-                    effective_loss = l['weight'] * lossLuma + lossChroma
+                    loss_luma = l['function'](sr[0], hr[:, 0, :, :])
+                    loss_chroma = l['function'](sr[1], hr[:, 1:, ::2, ::2])
+                    effective_loss = l['weight'] * loss_luma + loss_chroma
                 else:
                     loss = l['function'](sr, hr)
                     effective_loss = l['weight'] * loss
