@@ -166,7 +166,11 @@ class Model(nn.Module):
             for i in range(0, 4, n_GPUs):
                 lr_batch = torch.cat(lr_list[i:(i + n_GPUs)], dim=0)
                 sr_batch = self.model(lr_batch)
-                sr_list.extend(sr_batch.chunk(n_GPUs, dim=0))
+                if type(sr_batch) is list:
+                    sr_list[i].extend([sr_batch[0][i:i + 4/n_GPUs,:,:,:] for i in range(0, len(sr_batch[0][0]), 4 / n_GPUs)])
+                    sr_list[i].extend([sr_batch[1][i:i + 4 / n_GPUs,:,:,:] for i in range(0, len(sr_batch[1][0]), 4 / n_GPUs)])
+                else:
+                    sr_list.extend(sr_batch.chunk(n_GPUs, dim=0))
         else:
             sr_list = [
                 self.forward_chop(patch, shave=shave, min_size=min_size) \

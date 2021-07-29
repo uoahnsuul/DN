@@ -71,8 +71,13 @@ class Loss(nn.modules.loss._Loss):
         losses = []
         for i, l in enumerate(self.loss):
             if l['function'] is not None:
-                loss = l['function'](sr, hr)
-                effective_loss = l['weight'] * loss
+                if type(sr) == list:
+                    lossLuma = l['function'](sr[0], hr[:,0,:,:])
+                    lossChroma = l['function'](sr[1], hr[:,1:,::2,::2])
+                    effective_loss = l['weight'] * lossLuma + lossChroma
+                else:
+                    loss = l['function'](sr, hr)
+                    effective_loss = l['weight'] * loss
                 losses.append(effective_loss)
                 self.log[-1, i] += effective_loss.item()
             elif l['type'] == 'DIS':
