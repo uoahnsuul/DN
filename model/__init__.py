@@ -163,12 +163,13 @@ class Model(nn.Module):
 
         if w_size * h_size < min_size:
             sr_list = []
+            sr_list_ch = []
             for i in range(0, 4, n_GPUs):
                 lr_batch = torch.cat(lr_list[i:(i + n_GPUs)], dim=0)
                 sr_batch = self.model(lr_batch)
                 if type(sr_batch) is list:
-                    sr_list[i].extend([sr_batch[0][i:i + 4 / n_GPUs, :, :, :] for i in range(0, len(sr_batch[0][0]), 4 / n_GPUs)])
-                    sr_list[i].extend([sr_batch[1][i:i + 4 / n_GPUs, :, :, :] for i in range(0, len(sr_batch[1][0]), 4 / n_GPUs)])
+                    sr_list.extend(sr_batch[0].chunk(n_GPUs, dim=0))
+                    sr_list_ch.extend(sr_batch[1].chunk(n_GPUs, dim=0))
                 else:
                     sr_list.extend(sr_batch.chunk(n_GPUs, dim=0))
         else:
@@ -182,15 +183,42 @@ class Model(nn.Module):
         h_size, w_size = scale * h_size, scale * w_size
         shave *= scale
 
-        output = x.new(b, sr_list[0].size()[1], h, w)
-        output[:, :, 0:h_half, 0:w_half] \
-            = sr_list[0][:, :, 0:h_half, 0:w_half]
-        output[:, :, 0:h_half, w_half:w] \
-            = sr_list[1][:, :, 0:h_half, (w_size - w + w_half):w_size]
-        output[:, :, h_half:h, 0:w_half] \
-            = sr_list[2][:, :, (h_size - h + h_half):h_size, 0:w_half]
-        output[:, :, h_half:h, w_half:w] \
-            = sr_list[3][:, :, (h_size - h + h_half):h_size, (w_size - w + w_half):w_size]
+        if type(sr_batch) is list:
+            output = x.new(b, h, w)
+            output[:, 0:h_half, 0:w_half] \
+                = sr_list[0][:, 0:h_half, 0:w_half]
+            output[:, 0:h_half, w_half:w] \
+                = sr_list[1][:, 0:h_half, (w_size - w + w_half):w_size]
+            output[:, h_half:h, 0:w_half] \
+                = sr_list[2][:, (h_size - h + h_half):h_size, 0:w_half]
+            output[:, h_half:h, w_half:w] \
+                = sr_list[3][:, (h_size - h + h_half):h_size, (w_size - w + w_half):w_size]
+
+            h, w = scale * h // 2, scale * w // 2
+            h_half, w_half = scale * h_half // 2, scale * w_half // 2
+            h_size, w_size = scale * h_size // 2, scale * w_size // 2
+
+            output_chroma = x.new(b, sr_list[0].size()[1], h, w)
+            output_chroma[:, :, 0:h_half, 0:w_half] \
+                = sr_list_ch[0][:, :, 0:h_half, 0:w_half]
+            output_chroma[:, :, 0:h_half, w_half:w] \
+                = sr_list_ch[1][:, :, 0:h_half, (w_size - w + w_half):w_size]
+            output_chroma[:, :, h_half:h, 0:w_half] \
+                = sr_list_ch[2][:, :, (h_size - h + h_half):h_size, 0:w_half]
+            output_chroma[:, :, h_half:h, w_half:w] \
+                = sr_list_ch[3][:, :, (h_size - h + h_half):h_size, (w_size - w + w_half):w_size]
+            output = [output, output_chroma]
+
+        else:
+            output = x.new(b, sr_list[0].size()[1], h, w)
+            output[:, :, 0:h_half, 0:w_half] \
+                = sr_list[0][:, :, 0:h_half, 0:w_half]
+            output[:, :, 0:h_half, w_half:w] \
+                = sr_list[1][:, :, 0:h_half, (w_size - w + w_half):w_size]
+            output[:, :, h_half:h, 0:w_half] \
+                = sr_list[2][:, :, (h_size - h + h_half):h_size, 0:w_half]
+            output[:, :, h_half:h, w_half:w] \
+                = sr_list[3][:, :, (h_size - h + h_half):h_size, (w_size - w + w_half):w_size]
 
         return output
 
