@@ -216,26 +216,34 @@ class checkpoint():
 
 def quantize(img, rgb_range):
     pixel_range = rgb_range
-    return img.mul(pixel_range).clamp(0, pixel_range).round().div(pixel_range)
+    if type(img) is list:
+        img[0] = img[0].mul(pixel_range).clamp(0, pixel_range).round().div(pixel_range)
+        img[1] = img[1].mul(pixel_range).clamp(0, pixel_range).round().div(pixel_range)
+    else:
+        img = img.mul(pixel_range).clamp(0, pixel_range).round().div(pixel_range)
+    return img
 
 
 
-def calc_psnr(sr, hr, scale, rgb_range, dataset=None):
+def calc_psnr(sr, hr, scale, rgb_range, dataset=None): ## 리스트에 맞게 수정
     if hr.nelement() == 1: return 0
 
-    sr = sr[:, 0:3, :, :]
-    diff = (sr - hr)
-    if dataset and dataset.dataset.benchmark:
-        shave = scale
-        if diff.size(1) > 1:
-            gray_coeffs = [65.738, 129.057, 25.064]
-            convert = diff.new_tensor(gray_coeffs).view(1, 3, 1, 1) / 256
-            diff = diff.mul(convert).sum(dim=1)
+    if type(sr) is list:
+        print("")
     else:
-        shave = scale + 6
+        sr = sr[:, 0:3, :, :]
+        diff = (sr - hr)
+        if dataset and dataset.dataset.benchmark:
+            shave = scale
+            if diff.size(1) > 1:
+                gray_coeffs = [65.738, 129.057, 25.064]
+                convert = diff.new_tensor(gray_coeffs).view(1, 3, 1, 1) / 256
+                diff = diff.mul(convert).sum(dim=1)
+        else:
+            shave = scale + 6
 
-    valid = diff[..., shave:-shave, shave:-shave]
-    mse = valid.pow(2).mean()
+        valid = diff[..., shave:-shave, shave:-shave]
+        mse = valid.pow(2).mean()
 
     return -10 * math.log10(mse)
 
