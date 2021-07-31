@@ -198,7 +198,7 @@ class Model(nn.Module):
             h_half, w_half = scale * h_half // 2, scale * w_half // 2
             h_size, w_size = scale * h_size // 2, scale * w_size // 2
 
-            output_chroma = x.new(b, sr_list[0].size()[1], h, w)
+            output_chroma = x.new(b, sr_list_ch[0].size()[1], h, w)
             output_chroma[:, :, 0:h_half, 0:w_half] \
                 = sr_list_ch[0][:, :, 0:h_half, 0:w_half]
             output_chroma[:, :, 0:h_half, w_half:w] \
