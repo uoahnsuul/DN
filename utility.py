@@ -229,7 +229,23 @@ def calc_psnr(sr, hr, scale, rgb_range, dataset=None): ## 리스트에 맞게 �
     if hr.nelement() == 1: return 0
 
     if type(sr) is list:
-        print("")
+        diff_luma = (sr[0] - hr[:, 0, :, :])
+        diff_chroma = (sr[1][:, :, :, :] - hr[:, 1:, ::2, ::2])
+        if dataset and dataset.dataset.benchmark:
+            shave = scale
+            if diff_luma.size(1) > 1:
+                gray_coeffs = [65.738, 129.057, 25.064]
+                convert = diff_luma.new_tensor(gray_coeffs).view(1, 3, 1, 1) / 256
+                diff_luma = diff_luma.mul(convert).sum(dim=1)
+        else:
+            shave = scale + 6
+
+        valid = diff_luma[..., shave:-shave, shave:-shave]
+        mse_luma = valid.pow(2).mean()
+        valid = diff_chroma[..., shave:-shave, shave:-shave]
+        mse_chroma = valid.pow(2).mean()
+        psnr = -10 * math.log10(mse_luma) - 10 * math.log10(mse_chroma)
+
     else:
         sr = sr[:, 0:3, :, :]
         diff = (sr - hr)
@@ -244,8 +260,9 @@ def calc_psnr(sr, hr, scale, rgb_range, dataset=None): ## 리스트에 맞게 �
 
         valid = diff[..., shave:-shave, shave:-shave]
         mse = valid.pow(2).mean()
+        psnr = -10 * math.log10(mse)
 
-    return -10 * math.log10(mse)
+    return psnr
 
 
 
