@@ -225,7 +225,7 @@ def quantize(img, rgb_range):
 
 
 
-def calc_psnr(sr, hr, scale, rgb_range, dataset=None): ## 리스트에 맞게 수정
+def calc_psnr(sr, hr, scale, rgb_range, dataset=None):
     if hr.nelement() == 1: return 0
 
     if type(sr) is list:
